@@ -9,7 +9,7 @@ function Admin() {
     const [gallery, setGallery] = useState([]);
     const [nidhiList, setNidhiList] = useState([]);
 
-    const [imageUrl, setImageUrl] = useState("");
+const [selectedFile, setSelectedFile] = useState(null);
 
     const [noticeData, setNoticeData] = useState({
         title: "",
@@ -134,28 +134,37 @@ function Admin() {
         }
     };
 
-    const addPhoto = async (e) => {
-        e.preventDefault();
+   const addPhoto = async (e) => {
+       e.preventDefault();
 
-        if (imageUrl.trim() === "") {
-            alert("Image URL enter करा!");
-            return;
-        }
+       if (!selectedFile) {
+           alert("Photo select करा!");
+           return;
+       }
 
-        try {
-            await axios.post("http://localhost:8083/api/gallery", {
-                imageUrl: imageUrl,
-            });
+       try {
+           const formData = new FormData();
+           formData.append("file", selectedFile);
 
-            alert("Photo add झाला!");
-            setImageUrl("");
-            getGallery();
-        } catch (error) {
-            console.error(error);
-            alert("Photo add झाला नाही!");
-        }
-    };
+           await axios.post(
+               "http://localhost:8083/api/gallery/upload",
+               formData,
+               {
+                   headers: {
+                       "Content-Type": "multipart/form-data",
+                   },
+               }
+           );
 
+           alert("Photo upload झाला!");
+           setSelectedFile(null);
+           getGallery();
+
+       } catch (error) {
+           console.error(error);
+           alert("Photo upload झाला नाही!");
+       }
+   };
     const deletePhoto = async (id) => {
         const confirmDelete = window.confirm("हा photo delete करायचा आहे का?");
         if (!confirmDelete) return;
@@ -190,7 +199,7 @@ function Admin() {
         try {
             if (editNidhiId) {
                 await axios.put(
-                    `http://localhost:8082/api/nidhi/${editNidhiId}`,
+                    `http://localhost:8083/api/nidhi/${editNidhiId}`,
                     nidhiData
                 );
                 alert("Nidhi update झाला!");
@@ -518,71 +527,211 @@ function Admin() {
                 </button>
             </div>
 
-            {/* Gallery Management */}
-            <div className="card shadow p-4 mb-5">
-                <h3 className="mb-4 text-primary">Gallery Management</h3>
+          {/* Gallery Management */}
+          <div className="card shadow p-4 mb-5">
+              <h3 className="mb-4 text-primary">Gallery Management</h3>
 
-                <form onSubmit={addPhoto}>
+              <form onSubmit={addPhoto}>
+                  <div className="row">
+                      <div className="col-md-9 mb-3">
+                          <label className="form-label">Select Photo</label>
+
+                          <input
+                              type="file"
+                              className="form-control"
+                              accept="image/*"
+                              onChange={(e) => setSelectedFile(e.target.files[0])}
+                              required
+                          />
+                      </div>
+
+                      <div className="col-md-3 mb-3 d-flex align-items-end">
+                          <button type="submit" className="btn btn-success w-100">
+                              Upload Photo
+                          </button>
+                      </div>
+                  </div>
+              </form>
+
+              <hr />
+
+              <h4 className="mb-3 text-success">All Gallery Photos</h4>
+
+              <div className="row">
+                  {gallery.length > 0 ? (
+                      gallery.map((photo) => (
+                          <div className="col-md-4 mb-3" key={photo.id}>
+                              <div className="card shadow-sm">
+                                  <img
+                                      src={
+                                          photo.imageUrl?.startsWith("http")
+                                              ? photo.imageUrl
+                                              : `http://localhost:8083${photo.imageUrl}`
+                                      }
+                                      alt="Gallery"
+                                      className="card-img-top"
+                                      style={{
+                                          height: "200px",
+                                          objectFit: "cover",
+                                      }}
+                                  />
+
+                                  <div className="card-body text-center">
+                                      <button
+                                          className="btn btn-sm btn-danger"
+                                          onClick={() => deletePhoto(photo.id)}
+                                      >
+                                          Delete
+                                      </button>
+                                  </div>
+                              </div>
+                          </div>
+                      ))
+                  ) : (
+                      <p>No photos found</p>
+                  )}
+              </div>
+
+              <button className="btn btn-success mt-3" onClick={getGallery}>
+                  Refresh Gallery
+              </button>
+          </div>{/* Gallery Management */}
+                <div className="card shadow p-4 mb-5">
+                    <h3 className="mb-4 text-primary">Gallery Management</h3>
+
+                    <form onSubmit={addPhoto}>
+                        <div className="row">
+                            <div className="col-md-9 mb-3">
+                                <label className="form-label">Select Photo</label>
+
+                                <input
+                                    type="file"
+                                    className="form-control"
+                                    accept="image/*"
+                                    onChange={(e) => setSelectedFile(e.target.files[0])}
+                                    required
+                                />
+                            </div>
+
+                            <div className="col-md-3 mb-3 d-flex align-items-end">
+                                <button type="submit" className="btn btn-success w-100">
+                                    Upload Photo
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <hr />
+
+                    <h4 className="mb-3 text-success">All Gallery Photos</h4>
+
                     <div className="row">
-                        <div className="col-md-9 mb-3">
-                            <label className="form-label">Image URL</label>
-                            <input
-                                type="text"
-                                className="form-control"
-                                placeholder="Enter image URL"
-                                value={imageUrl}
-                                onChange={(e) => setImageUrl(e.target.value)}
-                                required
-                            />
-                        </div>
+                        {gallery.length > 0 ? (
+                            gallery.map((photo) => (
+                                <div className="col-md-4 mb-3" key={photo.id}>
+                                    <div className="card shadow-sm">
+                                        <img
+                                            src={
+                                                photo.imageUrl?.startsWith("http")
+                                                    ? photo.imageUrl
+                                                    : `http://localhost:8083${photo.imageUrl}`
+                                            }
+                                            alt="Gallery"
+                                            className="card-img-top"
+                                            style={{
+                                                height: "200px",
+                                                objectFit: "cover",
+                                            }}
+                                        />
 
-                        <div className="col-md-3 mb-3 d-flex align-items-end">
-                            <button type="submit" className="btn btn-success w-100">
-                                Add Photo
-                            </button>
-                        </div>
-                    </div>
-                </form>
-
-                <hr />
-
-                <h4 className="mb-3 text-success">All Gallery Photos</h4>
-
-                <div className="row">
-                    {gallery.length > 0 ? (
-                        gallery.map((photo) => (
-                            <div className="col-md-4 mb-3" key={photo.id}>
-                                <div className="card shadow-sm">
-                                    <img
-                                        src={photo.imageUrl}
-                                        alt="Gallery"
-                                        className="card-img-top"
-                                        style={{
-                                            height: "200px",
-                                            objectFit: "cover",
-                                        }}
-                                    />
-
-                                    <div className="card-body text-center">
-                                        <button
-                                            className="btn btn-sm btn-danger"
-                                            onClick={() => deletePhoto(photo.id)}
-                                        >
-                                            Delete
-                                        </button>
+                                        <div className="card-body text-center">
+                                            <button
+                                                className="btn btn-sm btn-danger"
+                                                onClick={() => deletePhoto(photo.id)}
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))
-                    ) : (
-                        <p>No photos found</p>
-                    )}
-                </div>
+                            ))
+                        ) : (
+                            <p>No photos found</p>
+                        )}
+                    </div>
 
-                <button className="btn btn-success mt-3" onClick={getGallery}>
-                    Refresh Gallery
-                </button>
-            </div>
+                    <button className="btn btn-success mt-3" onClick={getGallery}>
+                        Refresh Gallery
+                    </button>
+                </div>{/* Gallery Management */}
+                      <div className="card shadow p-4 mb-5">
+                          <h3 className="mb-4 text-primary">Gallery Management</h3>
+
+                          <form onSubmit={addPhoto}>
+                              <div className="row">
+                                  <div className="col-md-9 mb-3">
+                                      <label className="form-label">Select Photo</label>
+
+                                      <input
+                                          type="file"
+                                          className="form-control"
+                                          accept="image/*"
+                                          onChange={(e) => setSelectedFile(e.target.files[0])}
+                                          required
+                                      />
+                                  </div>
+
+                                  <div className="col-md-3 mb-3 d-flex align-items-end">
+                                      <button type="submit" className="btn btn-success w-100">
+                                          Upload Photo
+                                      </button>
+                                  </div>
+                              </div>
+                          </form>
+
+                          <hr />
+
+                          <h4 className="mb-3 text-success">All Gallery Photos</h4>
+
+                          <div className="row">
+                              {gallery.length > 0 ? (
+                                  gallery.map((photo) => (
+                                      <div className="col-md-4 mb-3" key={photo.id}>
+                                          <div className="card shadow-sm">
+                                              <img
+                                                  src={
+                                                      photo.imageUrl?.startsWith("http")
+                                                          ? photo.imageUrl
+                                                          : `http://localhost:8083${photo.imageUrl}`
+                                                  }
+                                                  alt="Gallery"
+                                                  className="card-img-top"
+                                                  style={{
+                                                      height: "200px",
+                                                      objectFit: "cover",
+                                                  }}
+                                              />
+
+                                              <div className="card-body text-center">
+                                                  <button
+                                                      className="btn btn-sm btn-danger"
+                                                      onClick={() => deletePhoto(photo.id)}
+                                                  >
+                                                      Delete
+                                                  </button>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  ))
+                              ) : (
+                                  <p>No photos found</p>
+                              )}
+                          </div>
+
+                          <button className="btn btn-success mt-3" onClick={getGallery}>
+                              Refresh Gallery
+                          </button>
+                      </div>
 
             {/* Contact Messages */}
             <div className="card shadow p-4">

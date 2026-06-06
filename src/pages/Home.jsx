@@ -12,6 +12,7 @@ function Home() {
     const [notices, setNotices] = useState([]);
     const [gallery, setGallery] = useState([]);
 
+    const API_BASE = "http://localhost:8083";
 
     useEffect(() => {
         loadNotices();
@@ -20,7 +21,7 @@ function Home() {
 
     const loadNotices = async () => {
         try {
-            const response = await axios.get("http://localhost:8082/api/notices");
+            const response = await axios.get(`${API_BASE}/api/notices`);
             setNotices(response.data);
         } catch (error) {
             console.error(error);
@@ -29,14 +30,27 @@ function Home() {
 
     const loadGallery = async () => {
         try {
-            const response = await axios.get("http://localhost:8082/api/gallery");
+            const response = await axios.get(`${API_BASE}/api/gallery`);
             setGallery(response.data);
         } catch (error) {
             console.error(error);
         }
     };
 
-    // Auto next gallery photo
+    const getImageUrl = (imageUrl) => {
+        if (!imageUrl) return "";
+
+        if (imageUrl.startsWith("http")) {
+            return imageUrl;
+        }
+
+        if (imageUrl.startsWith("/")) {
+            return `${API_BASE}${imageUrl}`;
+        }
+
+        return `${API_BASE}/${imageUrl}`;
+    };
+
     useEffect(() => {
         if (gallery.length > 1) {
             const interval = setInterval(() => {
@@ -258,12 +272,11 @@ function Home() {
                                 {gallery.length > 0 ? (
                                     gallery.map((photo, index) => (
                                         <div
-                                            className={`carousel-item ${index === 0 ? "active" : ""
-                                                }`}
+                                            className={`carousel-item ${index === 0 ? "active" : ""}`}
                                             key={photo.id}
                                         >
                                             <img
-                                                src={photo.imageUrl}
+                                                src={getImageUrl(photo.imageUrl)}
                                                 className="d-block w-100"
                                                 alt={`Gallery ${index + 1}`}
                                                 style={{
