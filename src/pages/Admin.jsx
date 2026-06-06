@@ -4,12 +4,16 @@ import { useNavigate } from "react-router-dom";
 
 function Admin() {
     const navigate = useNavigate();
+
+    const API_BASE = "https://grampanchat-website-backend.onrender.com";
+
     const [contacts, setContacts] = useState([]);
     const [notices, setNotices] = useState([]);
     const [gallery, setGallery] = useState([]);
     const [nidhiList, setNidhiList] = useState([]);
 
-const [selectedFile, setSelectedFile] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [fileInputKey, setFileInputKey] = useState(Date.now());
 
     const [noticeData, setNoticeData] = useState({
         title: "",
@@ -29,7 +33,7 @@ const [selectedFile, setSelectedFile] = useState(null);
 
     const getContacts = useCallback(async () => {
         try {
-            const response = await axios.get("https://grampanchat-website-backend.onrender.com/api/contact");
+            const response = await axios.get(`${API_BASE}/api/contact`);
             setContacts(response.data);
         } catch (error) {
             console.error(error);
@@ -39,7 +43,7 @@ const [selectedFile, setSelectedFile] = useState(null);
 
     const getNotices = useCallback(async () => {
         try {
-            const response = await axios.get("https://grampanchat-website-backend.onrender.com/api/notices");
+            const response = await axios.get(`${API_BASE}/api/notices`);
             setNotices(response.data);
         } catch (error) {
             console.error(error);
@@ -49,7 +53,7 @@ const [selectedFile, setSelectedFile] = useState(null);
 
     const getGallery = useCallback(async () => {
         try {
-            const response = await axios.get("https://grampanchat-website-backend.onrender.com/api/gallery");
+            const response = await axios.get(`${API_BASE}/api/gallery`);
             setGallery(response.data);
         } catch (error) {
             console.error(error);
@@ -59,32 +63,42 @@ const [selectedFile, setSelectedFile] = useState(null);
 
     const getNidhi = useCallback(async () => {
         try {
-            const response = await axios.get("https://grampanchat-website-backend.onrender.com/api/nidhi");
+            const response = await axios.get(`${API_BASE}/api/nidhi`);
             setNidhiList(response.data);
         } catch (error) {
             console.error(error);
             alert("Nidhi data load झाला नाही!");
         }
     }, []);
-    useEffect(() => {
 
-        const isLoggedIn =
-            localStorage.getItem("isAdminLogin");
+    useEffect(() => {
+        const isLoggedIn = localStorage.getItem("isAdminLogin");
 
         if (!isLoggedIn) {
             navigate("/login");
         }
-
     }, [navigate]);
-
 
     useEffect(() => {
         getContacts();
         getNotices();
         getGallery();
         getNidhi();
-
     }, [getContacts, getNotices, getGallery, getNidhi]);
+
+    const getImageUrl = (imageUrl) => {
+        if (!imageUrl) return "";
+
+        if (imageUrl.startsWith("http")) {
+            return imageUrl;
+        }
+
+        if (imageUrl.startsWith("/")) {
+            return `${API_BASE}${imageUrl}`;
+        }
+
+        return `${API_BASE}/${imageUrl}`;
+    };
 
     const handleNoticeChange = (e) => {
         setNoticeData({
@@ -104,7 +118,7 @@ const [selectedFile, setSelectedFile] = useState(null);
         e.preventDefault();
 
         try {
-            await axios.post("https://grampanchat-website-backend.onrender.com/api/notices", noticeData);
+            await axios.post(`${API_BASE}/api/notices`, noticeData);
             alert("Notice add झाली!");
 
             setNoticeData({
@@ -125,7 +139,7 @@ const [selectedFile, setSelectedFile] = useState(null);
         if (!confirmDelete) return;
 
         try {
-            await axios.delete(`https://grampanchat-website-backend.onrender.com/api/notices/${id}`);
+            await axios.delete(`${API_BASE}/api/notices/${id}`);
             alert("Notice delete झाली!");
             getNotices();
         } catch (error) {
@@ -134,43 +148,40 @@ const [selectedFile, setSelectedFile] = useState(null);
         }
     };
 
-   const addPhoto = async (e) => {
-       e.preventDefault();
+    const addPhoto = async (e) => {
+        e.preventDefault();
 
-       if (!selectedFile) {
-           alert("Photo select करा!");
-           return;
-       }
+        if (!selectedFile) {
+            alert("Photo select करा!");
+            return;
+        }
 
-       try {
-           const formData = new FormData();
-           formData.append("file", selectedFile);
+        try {
+            const formData = new FormData();
+            formData.append("file", selectedFile);
 
-           await axios.post(
-               "https://grampanchat-website-backend.onrender.com/api/gallery/upload",
-               formData,
-               {
-                   headers: {
-                       "Content-Type": "multipart/form-data",
-                   },
-               }
-           );
+            await axios.post(`${API_BASE}/api/gallery/upload`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
 
-           alert("Photo upload झाला!");
-           setSelectedFile(null);
-           getGallery();
+            alert("Photo upload झाला!");
+            setSelectedFile(null);
+            setFileInputKey(Date.now());
+            getGallery();
+        } catch (error) {
+            console.error(error);
+            alert("Photo upload झाला नाही!");
+        }
+    };
 
-       } catch (error) {
-           console.error(error);
-           alert("Photo upload झाला नाही!");
-       }
-   };
     const deletePhoto = async (id) => {
         const confirmDelete = window.confirm("हा photo delete करायचा आहे का?");
         if (!confirmDelete) return;
 
         try {
-            await axios.delete(`https://grampanchat-website-backend.onrender.com/api/gallery/${id}`);
+            await axios.delete(`${API_BASE}/api/gallery/${id}`);
             alert("Photo delete झाला!");
             getGallery();
         } catch (error) {
@@ -184,7 +195,7 @@ const [selectedFile, setSelectedFile] = useState(null);
         if (!confirmDelete) return;
 
         try {
-            await axios.delete(`https://grampanchat-website-backend.onrender.com/api/contact/${id}`);
+            await axios.delete(`${API_BASE}/api/contact/${id}`);
             alert("Message delete झाला!");
             getContacts();
         } catch (error) {
@@ -198,13 +209,10 @@ const [selectedFile, setSelectedFile] = useState(null);
 
         try {
             if (editNidhiId) {
-                await axios.put(
-                    `https://grampanchat-website-backend.onrender.com/api/nidhi/${editNidhiId}`,
-                    nidhiData
-                );
+                await axios.put(`${API_BASE}/api/nidhi/${editNidhiId}`, nidhiData);
                 alert("Nidhi update झाला!");
             } else {
-                await axios.post("https://grampanchat-website-backend.onrender.com/api/nidhi", nidhiData);
+                await axios.post(`${API_BASE}/api/nidhi`, nidhiData);
                 alert("Nidhi add झाला!");
             }
 
@@ -241,7 +249,7 @@ const [selectedFile, setSelectedFile] = useState(null);
         if (!confirmDelete) return;
 
         try {
-            await axios.delete(`https://grampanchat-website-backend.onrender.com/api/nidhi/${id}`);
+            await axios.delete(`${API_BASE}/api/nidhi/${id}`);
             alert("Nidhi delete झाला!");
             getNidhi();
         } catch (error) {
@@ -267,9 +275,9 @@ const [selectedFile, setSelectedFile] = useState(null);
         alert("Logout Successful");
         navigate("/login");
     };
+
     return (
         <div className="container py-5">
-
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h1 className="fw-bold text-success">Admin Dashboard</h1>
 
@@ -280,9 +288,7 @@ const [selectedFile, setSelectedFile] = useState(null);
 
             {/* Nidhi Management */}
             <div className="card shadow p-4 mb-5">
-                <h3 className="mb-4 text-primary">
-                    Nidhi Management
-                </h3>
+                <h3 className="mb-4 text-primary">Nidhi Management</h3>
 
                 <form onSubmit={saveNidhi}>
                     <div className="row">
@@ -527,211 +533,72 @@ const [selectedFile, setSelectedFile] = useState(null);
                 </button>
             </div>
 
-          {/* Gallery Management */}
-          <div className="card shadow p-4 mb-5">
-              <h3 className="mb-4 text-primary">Gallery Management</h3>
+            {/* Gallery Management */}
+            <div className="card shadow p-4 mb-5">
+                <h3 className="mb-4 text-primary">Gallery Management</h3>
 
-              <form onSubmit={addPhoto}>
-                  <div className="row">
-                      <div className="col-md-9 mb-3">
-                          <label className="form-label">Select Photo</label>
-
-                          <input
-                              type="file"
-                              className="form-control"
-                              accept="image/*"
-                              onChange={(e) => setSelectedFile(e.target.files[0])}
-                              required
-                          />
-                      </div>
-
-                      <div className="col-md-3 mb-3 d-flex align-items-end">
-                          <button type="submit" className="btn btn-success w-100">
-                              Upload Photo
-                          </button>
-                      </div>
-                  </div>
-              </form>
-
-              <hr />
-
-              <h4 className="mb-3 text-success">All Gallery Photos</h4>
-
-              <div className="row">
-                  {gallery.length > 0 ? (
-                      gallery.map((photo) => (
-                          <div className="col-md-4 mb-3" key={photo.id}>
-                              <div className="card shadow-sm">
-                                  <img
-                                      src={
-                                          photo.imageUrl?.startsWith("http")
-                                              ? photo.imageUrl
-                                              : `https://grampanchat-website-backend.onrender.com${photo.imageUrl}`
-                                      }
-                                      alt="Gallery"
-                                      className="card-img-top"
-                                      style={{
-                                          height: "200px",
-                                          objectFit: "cover",
-                                      }}
-                                  />
-
-                                  <div className="card-body text-center">
-                                      <button
-                                          className="btn btn-sm btn-danger"
-                                          onClick={() => deletePhoto(photo.id)}
-                                      >
-                                          Delete
-                                      </button>
-                                  </div>
-                              </div>
-                          </div>
-                      ))
-                  ) : (
-                      <p>No photos found</p>
-                  )}
-              </div>
-
-              <button className="btn btn-success mt-3" onClick={getGallery}>
-                  Refresh Gallery
-              </button>
-          </div>{/* Gallery Management */}
-                <div className="card shadow p-4 mb-5">
-                    <h3 className="mb-4 text-primary">Gallery Management</h3>
-
-                    <form onSubmit={addPhoto}>
-                        <div className="row">
-                            <div className="col-md-9 mb-3">
-                                <label className="form-label">Select Photo</label>
-
-                                <input
-                                    type="file"
-                                    className="form-control"
-                                    accept="image/*"
-                                    onChange={(e) => setSelectedFile(e.target.files[0])}
-                                    required
-                                />
-                            </div>
-
-                            <div className="col-md-3 mb-3 d-flex align-items-end">
-                                <button type="submit" className="btn btn-success w-100">
-                                    Upload Photo
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-
-                    <hr />
-
-                    <h4 className="mb-3 text-success">All Gallery Photos</h4>
-
+                <form onSubmit={addPhoto}>
                     <div className="row">
-                        {gallery.length > 0 ? (
-                            gallery.map((photo) => (
-                                <div className="col-md-4 mb-3" key={photo.id}>
-                                    <div className="card shadow-sm">
-                                        <img
-                                            src={
-                                                photo.imageUrl?.startsWith("http")
-                                                    ? photo.imageUrl
-                                                    : `https://grampanchat-website-backend.onrender.com${photo.imageUrl}`
-                                            }
-                                            alt="Gallery"
-                                            className="card-img-top"
-                                            style={{
-                                                height: "200px",
-                                                objectFit: "cover",
-                                            }}
-                                        />
+                        <div className="col-md-9 mb-3">
+                            <label className="form-label">Select Photo</label>
 
-                                        <div className="card-body text-center">
-                                            <button
-                                                className="btn btn-sm btn-danger"
-                                                onClick={() => deletePhoto(photo.id)}
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
+                            <input
+                                key={fileInputKey}
+                                type="file"
+                                className="form-control"
+                                accept="image/*"
+                                onChange={(e) => setSelectedFile(e.target.files[0])}
+                                required
+                            />
+                        </div>
+
+                        <div className="col-md-3 mb-3 d-flex align-items-end">
+                            <button type="submit" className="btn btn-success w-100">
+                                Upload Photo
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <hr />
+
+                <h4 className="mb-3 text-success">All Gallery Photos</h4>
+
+                <div className="row">
+                    {gallery.length > 0 ? (
+                        gallery.map((photo) => (
+                            <div className="col-md-4 mb-3" key={photo.id}>
+                                <div className="card shadow-sm">
+                                    <img
+                                        src={getImageUrl(photo.imageUrl)}
+                                        alt="Gallery"
+                                        className="card-img-top"
+                                        style={{
+                                            height: "200px",
+                                            objectFit: "cover",
+                                        }}
+                                    />
+
+                                    <div className="card-body text-center">
+                                        <button
+                                            className="btn btn-sm btn-danger"
+                                            onClick={() => deletePhoto(photo.id)}
+                                        >
+                                            Delete
+                                        </button>
                                     </div>
                                 </div>
-                            ))
-                        ) : (
-                            <p>No photos found</p>
-                        )}
-                    </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p>No photos found</p>
+                    )}
+                </div>
 
-                    <button className="btn btn-success mt-3" onClick={getGallery}>
-                        Refresh Gallery
-                    </button>
-                </div>{/* Gallery Management */}
-                      <div className="card shadow p-4 mb-5">
-                          <h3 className="mb-4 text-primary">Gallery Management</h3>
-
-                          <form onSubmit={addPhoto}>
-                              <div className="row">
-                                  <div className="col-md-9 mb-3">
-                                      <label className="form-label">Select Photo</label>
-
-                                      <input
-                                          type="file"
-                                          className="form-control"
-                                          accept="image/*"
-                                          onChange={(e) => setSelectedFile(e.target.files[0])}
-                                          required
-                                      />
-                                  </div>
-
-                                  <div className="col-md-3 mb-3 d-flex align-items-end">
-                                      <button type="submit" className="btn btn-success w-100">
-                                          Upload Photo
-                                      </button>
-                                  </div>
-                              </div>
-                          </form>
-
-                          <hr />
-
-                          <h4 className="mb-3 text-success">All Gallery Photos</h4>
-
-                          <div className="row">
-                              {gallery.length > 0 ? (
-                                  gallery.map((photo) => (
-                                      <div className="col-md-4 mb-3" key={photo.id}>
-                                          <div className="card shadow-sm">
-                                              <img
-                                                  src={
-                                                      photo.imageUrl?.startsWith("http")
-                                                          ? photo.imageUrl
-                                                          : `https://grampanchat-website-backend.onrender.com${photo.imageUrl}`
-                                                  }
-                                                  alt="Gallery"
-                                                  className="card-img-top"
-                                                  style={{
-                                                      height: "200px",
-                                                      objectFit: "cover",
-                                                  }}
-                                              />
-
-                                              <div className="card-body text-center">
-                                                  <button
-                                                      className="btn btn-sm btn-danger"
-                                                      onClick={() => deletePhoto(photo.id)}
-                                                  >
-                                                      Delete
-                                                  </button>
-                                              </div>
-                                          </div>
-                                      </div>
-                                  ))
-                              ) : (
-                                  <p>No photos found</p>
-                              )}
-                          </div>
-
-                          <button className="btn btn-success mt-3" onClick={getGallery}>
-                              Refresh Gallery
-                          </button>
-                      </div>
+                <button className="btn btn-success mt-3" onClick={getGallery}>
+                    Refresh Gallery
+                </button>
+            </div>
 
             {/* Contact Messages */}
             <div className="card shadow p-4">
