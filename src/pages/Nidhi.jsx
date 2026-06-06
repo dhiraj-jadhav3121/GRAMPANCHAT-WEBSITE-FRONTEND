@@ -16,7 +16,7 @@ function Nidhi() {
 
     const fetchNidhiData = async () => {
         try {
-            const response = await axios.get("http://localhost:8083/api/nidhi");
+            const response = await axios.get("https://grampanchat-website-backend.onrender.com/api/nidhi");
 
             const data = response.data;
             setWorks(data);

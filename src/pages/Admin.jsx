@@ -29,7 +29,7 @@ const [selectedFile, setSelectedFile] = useState(null);
 
     const getContacts = useCallback(async () => {
         try {
-            const response = await axios.get("http://localhost:8083/api/contact");
+            const response = await axios.get("https://grampanchat-website-backend.onrender.com/api/contact");
             setContacts(response.data);
         } catch (error) {
             console.error(error);
@@ -39,7 +39,7 @@ const [selectedFile, setSelectedFile] = useState(null);
 
     const getNotices = useCallback(async () => {
         try {
-            const response = await axios.get("http://localhost:8083/api/notices");
+            const response = await axios.get("https://grampanchat-website-backend.onrender.com/api/notices");
             setNotices(response.data);
         } catch (error) {
             console.error(error);
@@ -49,7 +49,7 @@ const [selectedFile, setSelectedFile] = useState(null);
 
     const getGallery = useCallback(async () => {
         try {
-            const response = await axios.get("http://localhost:8083/api/gallery");
+            const response = await axios.get("https://grampanchat-website-backend.onrender.com/api/gallery");
             setGallery(response.data);
         } catch (error) {
             console.error(error);
@@ -59,7 +59,7 @@ const [selectedFile, setSelectedFile] = useState(null);
 
     const getNidhi = useCallback(async () => {
         try {
-            const response = await axios.get("http://localhost:8083/api/nidhi");
+            const response = await axios.get("https://grampanchat-website-backend.onrender.com/api/nidhi");
             setNidhiList(response.data);
         } catch (error) {
             console.error(error);
@@ -104,7 +104,7 @@ const [selectedFile, setSelectedFile] = useState(null);
         e.preventDefault();
 
         try {
-            await axios.post("http://localhost:8083/api/notices", noticeData);
+            await axios.post("https://grampanchat-website-backend.onrender.com/api/notices", noticeData);
             alert("Notice add झाली!");
 
             setNoticeData({
@@ -125,7 +125,7 @@ const [selectedFile, setSelectedFile] = useState(null);
         if (!confirmDelete) return;
 
         try {
-            await axios.delete(`http://localhost:8083/api/notices/${id}`);
+            await axios.delete(`https://grampanchat-website-backend.onrender.com/api/notices/${id}`);
             alert("Notice delete झाली!");
             getNotices();
         } catch (error) {
@@ -147,7 +147,7 @@ const [selectedFile, setSelectedFile] = useState(null);
            formData.append("file", selectedFile);
 
            await axios.post(
-               "http://localhost:8083/api/gallery/upload",
+               "https://grampanchat-website-backend.onrender.com/api/gallery/upload",
                formData,
                {
                    headers: {
@@ -170,7 +170,7 @@ const [selectedFile, setSelectedFile] = useState(null);
         if (!confirmDelete) return;
 
         try {
-            await axios.delete(`http://localhost:8083/api/gallery/${id}`);
+            await axios.delete(`https://grampanchat-website-backend.onrender.com/api/gallery/${id}`);
             alert("Photo delete झाला!");
             getGallery();
         } catch (error) {
@@ -184,7 +184,7 @@ const [selectedFile, setSelectedFile] = useState(null);
         if (!confirmDelete) return;
 
         try {
-            await axios.delete(`http://localhost:8083/api/contact/${id}`);
+            await axios.delete(`https://grampanchat-website-backend.onrender.com/api/contact/${id}`);
             alert("Message delete झाला!");
             getContacts();
         } catch (error) {
@@ -199,12 +199,12 @@ const [selectedFile, setSelectedFile] = useState(null);
         try {
             if (editNidhiId) {
                 await axios.put(
-                    `http://localhost:8083/api/nidhi/${editNidhiId}`,
+                    `https://grampanchat-website-backend.onrender.com/api/nidhi/${editNidhiId}`,
                     nidhiData
                 );
                 alert("Nidhi update झाला!");
             } else {
-                await axios.post("http://localhost:8083/api/nidhi", nidhiData);
+                await axios.post("https://grampanchat-website-backend.onrender.com/api/nidhi", nidhiData);
                 alert("Nidhi add झाला!");
             }
 
@@ -241,7 +241,7 @@ const [selectedFile, setSelectedFile] = useState(null);
         if (!confirmDelete) return;
 
         try {
-            await axios.delete(`http://localhost:8083/api/nidhi/${id}`);
+            await axios.delete(`https://grampanchat-website-backend.onrender.com/api/nidhi/${id}`);
             alert("Nidhi delete झाला!");
             getNidhi();
         } catch (error) {
@@ -566,7 +566,7 @@ const [selectedFile, setSelectedFile] = useState(null);
                                       src={
                                           photo.imageUrl?.startsWith("http")
                                               ? photo.imageUrl
-                                              : `http://localhost:8083${photo.imageUrl}`
+                                              : `https://grampanchat-website-backend.onrender.com${photo.imageUrl}`
                                       }
                                       alt="Gallery"
                                       className="card-img-top"
@@ -634,7 +634,7 @@ const [selectedFile, setSelectedFile] = useState(null);
                                             src={
                                                 photo.imageUrl?.startsWith("http")
                                                     ? photo.imageUrl
-                                                    : `http://localhost:8083${photo.imageUrl}`
+                                                    : `https://grampanchat-website-backend.onrender.com${photo.imageUrl}`
                                             }
                                             alt="Gallery"
                                             className="card-img-top"
@@ -702,7 +702,7 @@ const [selectedFile, setSelectedFile] = useState(null);
                                                   src={
                                                       photo.imageUrl?.startsWith("http")
                                                           ? photo.imageUrl
-                                                          : `http://localhost:8083${photo.imageUrl}`
+                                                          : `https://grampanchat-website-backend.onrender.com${photo.imageUrl}`
                                                   }
                                                   alt="Gallery"
                                                   className="card-img-top"

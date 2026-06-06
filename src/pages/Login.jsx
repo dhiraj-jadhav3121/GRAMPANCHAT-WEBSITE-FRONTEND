@@ -27,7 +27,7 @@ function Login() {
 
         try {
             const response = await axios.post(
-                "http://localhost:8083/api/admin/login",
+                "https://grampanchat-website-backend.onrender.com/api/admin/login",
                 {
                     username: username,
                     password: password,
@@ -58,7 +58,7 @@ function Login() {
 
         try {
             const response = await axios.post(
-                "http://localhost:8083/api/admin/send-otp",
+                "https://grampanchat-website-backend.onrender.com/api/admin/send-otp",
                 {
                     email: email,
                 }
@@ -94,7 +94,7 @@ function Login() {
 
         try {
             const response = await axios.put(
-                "http://localhost:8083/api/admin/reset-password",
+                "https://grampanchat-website-backend.onrender.com/api/admin/reset-password",
                 {
                     email: email,
                     otp: otp,

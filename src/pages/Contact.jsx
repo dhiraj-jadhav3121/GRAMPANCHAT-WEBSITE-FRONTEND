@@ -23,7 +23,7 @@ function Contact() {
         try {
 
             const response = await axios.post(
-                "http://localhost:8083/api/contact",
+                "https://grampanchat-website-backend.onrender.com/api/contact",
                 formData
             );
 

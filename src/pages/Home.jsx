@@ -12,7 +12,7 @@ function Home() {
     const [notices, setNotices] = useState([]);
     const [gallery, setGallery] = useState([]);
 
-    const API_BASE = "http://localhost:8083";
+    const API_BASE = "https://grampanchat-website-backend.onrender.com";
 
     useEffect(() => {
         loadNotices();
